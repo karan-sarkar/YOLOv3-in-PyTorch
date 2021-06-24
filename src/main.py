@@ -292,7 +292,8 @@ def run_training(model, optimizer, dataloader, device, img_size, n_epoch, every_
 
 
 def save_results_as_json(results, json_path, source_path):
-    source = json.loads(source_path)
+    with open(source_path) as f:
+        source = json.load(f)
     results_json = []
     annotations = list()
     counter = 0
