@@ -1,5 +1,6 @@
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
+import argparse
 
 __all__ = ['COCOEvaluator']
 
