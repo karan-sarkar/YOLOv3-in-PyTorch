@@ -316,7 +316,7 @@ def save_results_as_json(results, json_path):
         image['height'] = 720
         image['width'] = 1280
 
-        image['id'] = counter
+        image['id'] = len(images) + 1
     
         path, detections, _, _ = result_raw
         image_id = os.path.basename(path)
@@ -326,12 +326,13 @@ def save_results_as_json(results, json_path):
         except ValueError:
             pass
         image['file_name'] = image_id
+        empty = True
         
         
         for detection in detections:
             annotation = dict()
             annotation["iscrowd"] = 0
-            
+            empty = False
             detection = detection.tolist()
             bbox = detection[:4]
             x1, y1, w1, h1 = bbox[0], bbox[1], bbox[2], bbox[3]
@@ -350,7 +351,8 @@ def save_results_as_json(results, json_path):
             annotation['id'] = len(annotations)
             annotation['segmentation'] = [[x1, y1, x1, y2, x2, y2, x2, y1]]
             annotations.append(annotation)
-        images.append(image)
+        if not empty:
+            images.append(image)
     
         attr_dict = dict()
     attr_dict["images"] = images
