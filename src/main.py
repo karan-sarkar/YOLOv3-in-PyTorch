@@ -308,7 +308,6 @@ def save_results_as_json(results, json_path, source_path):
     
         path, detections, _, _ = result_raw
         image_id = os.path.basename(path)
-        image_id, _ = os.path.splitext(image_id)
         try:
             image_id = int(image_id)
         except ValueError:
