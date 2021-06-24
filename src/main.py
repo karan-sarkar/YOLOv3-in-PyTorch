@@ -34,6 +34,7 @@ import time
 import torch
 from PIL import Image
 from torch.utils.data import DataLoader
+import torch.nn as nn
 
 from datasets.utils import collate_img_label_fn
 from datasets.image import ImageFolder
