@@ -297,6 +297,7 @@ def save_results_as_json(results, json_path, source_path):
     results_json = []
     annotations = list()
     counter = 0
+    attr_dict = {}
     attr_dict["categories"] = source["categories"]
     attr_dict["images"] = source["images"]
     
