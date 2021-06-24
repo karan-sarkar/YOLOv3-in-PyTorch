@@ -11,11 +11,6 @@ def parse_args():
     _options = parser.parse_args()
     return _options
 
-args = parse_args()
-
-eval = COCOEvaluator(args.gt, args.dt)
-print(eval.evaluate())
-
 class COCOEvaluator(object):
 
     def __init__(self, anno_gt_file, anno_dt_file):
@@ -34,3 +29,8 @@ class COCOEvaluator(object):
         coco_eval.summarize()
 
         return coco_eval
+        
+args = parse_args()
+
+eval = COCOEvaluator(args.gt, args.dt)
+print(eval.evaluate())
