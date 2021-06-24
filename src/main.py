@@ -233,6 +233,7 @@ def run_detection(model, dataloader, device, conf_thres, nms_thres):
 
 def run_training(model, optimizer, dataloader, device, img_size, n_epoch, every_n_batch, every_n_epoch, ckpt_dir):
     losses = None
+    m = nn.DataParallel(model)
     for epoch_i in range(n_epoch):
         for batch_i, (imgs, targets, target_lengths) in enumerate(dataloader):
             with torch.autograd.detect_anomaly():
@@ -240,7 +241,7 @@ def run_training(model, optimizer, dataloader, device, img_size, n_epoch, every_
                 imgs = imgs.to(device)
                 targets = targets.to(device)
                 target_lengths = target_lengths.to(device)
-                result = model(imgs)
+                result = m(imgs)
                 try:
                     losses = yolo_loss_fn(result, targets, target_lengths, img_size, False)
                     losses[0].backward()
