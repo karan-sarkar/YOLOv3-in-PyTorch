@@ -296,7 +296,20 @@ def save_results_as_json(results, json_path):
     images = list()
     annotations = list()
     counter = 0
-    
+    attr_dict["categories"] = [
+        {"supercategory": "none", "id": 1, "name": "person"},
+        {"supercategory": "none", "id": 2, "name": "rider"},
+        {"supercategory": "none", "id": 3, "name": "car"},
+        {"supercategory": "none", "id": 4, "name": "bus"},
+        {"supercategory": "none", "id": 5, "name": "truck"},
+        {"supercategory": "none", "id": 6, "name": "bike"},
+        {"supercategory": "none", "id": 7, "name": "motor"},
+        {"supercategory": "none", "id": 8, "name": "traffic light"},
+        {"supercategory": "none", "id": 9, "name": "traffic sign"},
+        {"supercategory": "none", "id": 10, "name": "train"}
+    ]
+
+    attr_id_dict = {i['name']: i['id'] for i in attr_dict['categories']}
     for result_raw in results:
         counter += 1
         image = dict()
@@ -326,7 +339,7 @@ def save_results_as_json(results, json_path):
             y2 = y1 + h1
             
             score = detection[4]
-            category_id = add_coco_empty_category(int(detection[5]))
+            category_id = int(detection[5])
             
             annotation["image_id"] = image['id']
             annotation['bbox'] = bbox
@@ -340,20 +353,6 @@ def save_results_as_json(results, json_path):
         images.append(image)
     
         attr_dict = dict()
-    attr_dict["categories"] = [
-        {"supercategory": "none", "id": 1, "name": "person"},
-        {"supercategory": "none", "id": 2, "name": "rider"},
-        {"supercategory": "none", "id": 3, "name": "car"},
-        {"supercategory": "none", "id": 4, "name": "bus"},
-        {"supercategory": "none", "id": 5, "name": "truck"},
-        {"supercategory": "none", "id": 6, "name": "bike"},
-        {"supercategory": "none", "id": 7, "name": "motor"},
-        {"supercategory": "none", "id": 8, "name": "traffic light"},
-        {"supercategory": "none", "id": 9, "name": "traffic sign"},
-        {"supercategory": "none", "id": 10, "name": "train"}
-    ]
-
-    attr_id_dict = {i['name']: i['id'] for i in attr_dict['categories']}
     attr_dict["images"] = images
     attr_dict["annotations"] = annotations
     attr_dict["type"] = "instances"
