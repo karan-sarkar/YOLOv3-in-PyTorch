@@ -291,32 +291,18 @@ def run_training(model, optimizer, dataloader, device, img_size, n_epoch, every_
     return
 
 
-def save_results_as_json(results, json_path):
+def save_results_as_json(results, json_path, source_path):
+    source = json.loads(source_path)
     results_json = []
-    images = list()
     annotations = list()
     counter = 0
-    attr_dict["categories"] = [
-        {"supercategory": "none", "id": 1, "name": "person"},
-        {"supercategory": "none", "id": 2, "name": "rider"},
-        {"supercategory": "none", "id": 3, "name": "car"},
-        {"supercategory": "none", "id": 4, "name": "bus"},
-        {"supercategory": "none", "id": 5, "name": "truck"},
-        {"supercategory": "none", "id": 6, "name": "bike"},
-        {"supercategory": "none", "id": 7, "name": "motor"},
-        {"supercategory": "none", "id": 8, "name": "traffic light"},
-        {"supercategory": "none", "id": 9, "name": "traffic sign"},
-        {"supercategory": "none", "id": 10, "name": "train"}
-    ]
+    attr_dict["categories"] = source["categories"]
+    attr_dict["images"] = source["images"]
+    
+    ids = {image['file_name']:image['id'] for image in source["images"]}
 
-    attr_id_dict = {i['name']: i['id'] for i in attr_dict['categories']}
     for result_raw in results:
         counter += 1
-        image = dict()
-        image['height'] = 720
-        image['width'] = 1280
-
-        image['id'] = len(images) + 1
     
         path, detections, _, _ = result_raw
         image_id = os.path.basename(path)
@@ -325,14 +311,11 @@ def save_results_as_json(results, json_path):
             image_id = int(image_id)
         except ValueError:
             pass
-        image['file_name'] = image_id
-        empty = True
         
         
         for detection in detections:
             annotation = dict()
             annotation["iscrowd"] = 0
-            empty = False
             detection = detection.tolist()
             bbox = detection[:4]
             x1, y1, w1, h1 = bbox[0], bbox[1], bbox[2], bbox[3]
@@ -342,7 +325,7 @@ def save_results_as_json(results, json_path):
             score = detection[4]
             category_id = int(detection[5])
             
-            annotation["image_id"] = image['id']
+            annotation["image_id"] = ids[image_id]
             annotation['bbox'] = bbox
             annotation['area'] = float(bbox[2] * bbox[3])
             annotation['category_id'] = category_id
@@ -351,11 +334,7 @@ def save_results_as_json(results, json_path):
             annotation['id'] = len(annotations)
             annotation['segmentation'] = [[x1, y1, x1, y2, x2, y2, x2, y1]]
             annotations.append(annotation)
-        if not empty:
-            images.append(image)
     
-        attr_dict = dict()
-    attr_dict["images"] = images
     attr_dict["annotations"] = annotations
     attr_dict["type"] = "instances"
     with open(json_path, 'w') as f:
@@ -427,7 +406,7 @@ def run_yolo_inference(opt):
     if opt.save_det:
         json_path = '{}/{}/detections.json'.format(opt.out_dir, current_datetime_str)
         make_output_dir(os.path.split(json_path)[0])
-        save_results_as_json(results, json_path)
+        save_results_as_json(results, json_path, opt.annot_path)
     if opt.save_img:
         class_names = load_classes(opt.class_path)
         img_path = '{}/{}/img'.format(opt.out_dir, current_datetime_str)
