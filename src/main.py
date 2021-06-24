@@ -291,7 +291,18 @@ def run_training(model, optimizer, dataloader, device, img_size, n_epoch, every_
 
 def save_results_as_json(results, json_path):
     results_json = []
+    images = list()
+    annotations = list()
+    counter = 0
+    
     for result_raw in results:
+        counter += 1
+        image = dict()
+        image['height'] = 720
+        image['width'] = 1280
+
+        image['id'] = counter
+    
         path, detections, _, _ = result_raw
         image_id = os.path.basename(path)
         image_id, _ = os.path.splitext(image_id)
@@ -299,15 +310,53 @@ def save_results_as_json(results, json_path):
             image_id = int(image_id)
         except ValueError:
             pass
+        image['file_name'] = image_id
+        
+        
         for detection in detections:
+            annotation = dict()
+            annotation["iscrowd"] = 0
+            
             detection = detection.tolist()
             bbox = detection[:4]
+            x1, y1, w1, h1 = bbox[0], bbox[1], bbox[2], bbox[3]
+            x2 = x1 + w1
+            y2 = y1 + h1
+            
             score = detection[4]
             category_id = add_coco_empty_category(int(detection[5]))
-            result = {'image_id': image_id, 'category_id': category_id, 'bbox': bbox, 'score': score}
-            results_json.append(result)
+            
+            annotation["image_id"] = image['id']
+            annotation['bbox'] = bbox
+            annotation['area'] = float(bbox[2] * bbox[3])
+            annotation['category_id'] = category_id
+            annotation['ignore'] = 0
+            
+            annotation['id'] = len(annotations)
+            annotation['segmentation'] = [[x1, y1, x1, y2, x2, y2, x2, y1]]
+            annotations.append(annotation)
+        images.append(image)
+    
+        attr_dict = dict()
+    attr_dict["categories"] = [
+        {"supercategory": "none", "id": 1, "name": "person"},
+        {"supercategory": "none", "id": 2, "name": "rider"},
+        {"supercategory": "none", "id": 3, "name": "car"},
+        {"supercategory": "none", "id": 4, "name": "bus"},
+        {"supercategory": "none", "id": 5, "name": "truck"},
+        {"supercategory": "none", "id": 6, "name": "bike"},
+        {"supercategory": "none", "id": 7, "name": "motor"},
+        {"supercategory": "none", "id": 8, "name": "traffic light"},
+        {"supercategory": "none", "id": 9, "name": "traffic sign"},
+        {"supercategory": "none", "id": 10, "name": "train"}
+    ]
+
+    attr_id_dict = {i['name']: i['id'] for i in attr_dict['categories']}
+    attr_dict["images"] = images
+    attr_dict["annotations"] = annotations
+    attr_dict["type"] = "instances"
     with open(json_path, 'w') as f:
-        json.dump(results_json, f)
+        json.dump(attr_dict, f)
     return
 
 
