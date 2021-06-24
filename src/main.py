@@ -316,26 +316,27 @@ def save_results_as_json(results, json_path, source_path):
         
         
         for detection in detections:
-            annotation = dict()
-            annotation["iscrowd"] = 0
-            detection = detection.tolist()
-            bbox = detection[:4]
-            x1, y1, w1, h1 = bbox[0], bbox[1], bbox[2], bbox[3]
-            x2 = x1 + w1
-            y2 = y1 + h1
-            
-            score = detection[4]
-            category_id = int(detection[5])
-            
-            annotation["image_id"] = ids[image_id]
-            annotation['bbox'] = bbox
-            annotation['area'] = float(bbox[2] * bbox[3])
-            annotation['category_id'] = category_id
-            annotation['ignore'] = 0
-            
-            annotation['id'] = len(annotations)
-            annotation['segmentation'] = [[x1, y1, x1, y2, x2, y2, x2, y1]]
-            annotations.append(annotation)
+            if image_id in ids:
+                annotation = dict()
+                annotation["iscrowd"] = 0
+                detection = detection.tolist()
+                bbox = detection[:4]
+                x1, y1, w1, h1 = bbox[0], bbox[1], bbox[2], bbox[3]
+                x2 = x1 + w1
+                y2 = y1 + h1
+                
+                score = detection[4]
+                category_id = int(detection[5])
+                
+                annotation["image_id"] = ids[image_id]
+                annotation['bbox'] = bbox
+                annotation['area'] = float(bbox[2] * bbox[3])
+                annotation['category_id'] = category_id
+                annotation['ignore'] = 0
+                
+                annotation['id'] = len(annotations)
+                annotation['segmentation'] = [[x1, y1, x1, y2, x2, y2, x2, y1]]
+                annotations.append(annotation)
     
     attr_dict["annotations"] = annotations
     attr_dict["type"] = "instances"
